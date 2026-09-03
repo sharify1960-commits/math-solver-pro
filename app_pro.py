@@ -52,9 +52,9 @@ if uploaded_file is not None:
                    - הקפד על דיוק חישובי והסבר מילולי קצר לכל מעבר שלב משמעותי.
                 """
                 
-                # קריאה למודל היציב והתקין של גוגל
+                # קריאה למודל העדכני והתקין של גוגל
                 response = client.models.generate_content(
-                    model='gemini-1.5-flash',
+                    model='gemini-2.0-flash',
                     contents=[image, prompt]
                 )
                 
