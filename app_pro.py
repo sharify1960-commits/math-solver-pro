@@ -19,8 +19,8 @@ st.markdown("מערכת המבוססת על בינה מלאכותית לניתו
 api_key = st.text_input("הכנס Google Gemini API Key:", type="password")
 
 if not api_key:
-    st.warning("⚠️ מוצר במערכת API לא נמצא מפתח.")
-    st.info("כדי להתחיל להשתמש במערכת API אנא הזן מפתח.")
+    st.warning("⚠️ לא נמצא מפתח API במערכת.")
+    st.info("אנא הזן מפתח API כדי להתחיל להשתמש במערכת.")
     st.stop()
 
 # אתחול הלקוח של גוגל
@@ -49,7 +49,7 @@ if uploaded_file is not None:
                    - הקפד על דיוק חישובי והסבר מילולי קצר לכל מעבר שלב משמעותי.
                 """
                 
-                # קריאה למודל המתקדם של גוגל (Gemini 2.5 Flash או מודל עדכני תואם)
+                # קריאה למודל המתקדם של גוגל
                 response = client.models.generate_content(
                     model='gemini-2.5-flash',
                     contents=[image, prompt]
