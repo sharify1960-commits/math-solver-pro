@@ -1,0 +1,70 @@
+import os
+import streamlit as st
+from google import genai
+from google.genai import types
+
+# הגדרת עמוד Streamlit
+st.set_page_config(
+    page_title="מערכת חכמה לפתרון תרגילים במתמטיקה ופיזיקה",
+    page_icon="📐",
+    layout="wide"
+)
+
+st.title("📐 מערכת מתקדמת לפתרון תרגילים אקדמיים")
+st.markdown("מערכת המבוססת על בינה מלאכותית לניתוח מדויק של שאלות, זיהוי דינמי של סעיפים (או שאלות ללא סעיפים) והצגת פתרונות מנומקים.")
+
+# הגדרת מפתח ה-API (ניתן לקחת מ-Streamlit Secrets או להזין ידנית)
+api_key = st.secrets.get("GEMINI_API_KEY") or os.environ.get("GEMINI_API_KEY")
+
+if not api_key:
+    st.warning("⚠️ לא נמצא מפתח API מוגדר במערכת.")
+    api_key = st.text_input("הכנס מפתח Google Gemini API Key:", type="password")
+
+if api_key:
+    client = genai.Client(api_key=api_key)
+    
+    # העלאת קובץ/תמונה של התרגיל
+    uploaded_file = st.file_uploader("העלה צילום מסך או תמונה של התרגיל (מתמטיקה/פיזיקה):", type=["png", "jpg", "jpeg"])
+    
+    if uploaded_file is not None:
+        # הצגת התמונה
+        st.image(uploaded_file, caption="התרגיל שהועלה", use_column_width=True)
+        
+        if st.button("🚀 פתח תרגיל בצורה חכמה", type="primary"):
+            with st.spinner("מנתח את השאלה, מזהה סעיפים ומייצר פתרון אקדמי..."):
+                try:
+                    # המרת התמונה לפורמט שה-SDK החדש דורש
+                    image_bytes = uploaded_file.getvalue()
+                    image_part = types.Part.from_bytes(
+                        data=image_bytes,
+                        mime_type=uploaded_file.type
+                    )
+                    
+                    # הנחיית מערכת (Prompt) חכמה המטפלת גם בשאלות ללא סעיפים וגם במספר בלתי מוגבל של סעיפים
+                    prompt = """
+                    אתה מורה אקדמי מומחה למתמטיקה ופיזיקה. נתחה את התמונה המצורפת בעיון רב.
+                    
+                    עליך לבצע את הפעולות הבאות:
+                    1. זיהוי מבנה השאלה:
+                       - אם השאלה היא שאלה כללית/פתוחה **ללא סעיפים**, פתור אותה כיחידה אחת שלמה, ברורה ומנומקת.
+                       - אם השאלה כוללת **סעיפים**, זהה באופן דינמי ואוטומטי את **כל** הסעיפים הקיימים בתרגיל (ללא שום מגבלה או הנחה שמדובר במספר קבוע של סעיפים).
+                    
+                    2. מתן פתרון אקדמי מלא:
+                       - הצג שלבי פתרון מפורטים, הגיוניים ומתמטיים/פיזיקליים לכל חלק או סעיף שזוהה.
+                       - השתמש בסימון מתמטי ברור (LaTeX) היכן שנדרש.
+                    """
+                    
+                    # קריאה למודל המתקדם של גוגל (Gemini 2.5 Flash או מודל עדכני תואם)
+                    response = client.models.generate_content(
+                        model='gemini-2.5-flash',
+                        contents=[image_part, prompt]
+                    )
+                    
+                    st.success("הפתרון נוצר בהצלחה!")
+                    st.markdown("### 📝 תוצאות והסברים:")
+                    st.markdown(response.text)
+                    
+                except Exception as e:
+                    st.error(f"אירעה שגיאה בעיבוד הבקשה: {e}")
+else:
+    st.info("אנא הזן מפתח API כדי להתחיל להשתמש במערכת.")
