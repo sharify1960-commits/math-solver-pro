@@ -28,7 +28,7 @@ if api_key:
     
     if uploaded_file is not None:
         # הצגת התמונה
-        st.image(uploaded_file, caption="התרגיל שהועלה", use_column_width=True)
+       st.image(uploaded_file, caption="התרגיל שהועלה", use_container_width=True)
         
         if st.button("🚀 פתח תרגיל בצורה חכמה", type="primary"):
             with st.spinner("מנתח את השאלה, מזהה סעיפים ומייצר פתרון אקדמי..."):
