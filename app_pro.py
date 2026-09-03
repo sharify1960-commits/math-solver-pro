@@ -1,70 +1,63 @@
-import os
 import streamlit as st
+import os
 from google import genai
 from google.genai import types
+import PIL.Image
 
-# הגדרת עמוד Streamlit
+# הגדרת דף
 st.set_page_config(
-    page_title="מערכת חכמה לפתרון תרגילים במתמטיקה ופיזיקה",
+    page_title="מערכת מתקדמת לפתרון תרגילים אקדמיים",
     page_icon="📐",
     layout="wide"
 )
 
+# כותרת ראשית
 st.title("📐 מערכת מתקדמת לפתרון תרגילים אקדמיים")
 st.markdown("מערכת המבוססת על בינה מלאכותית לניתוח מדויק של שאלות, זיהוי דינמי של סעיפים (או שאלות ללא סעיפים) והצגת פתרונות מנומקים.")
 
-# הגדרת מפתח ה-API (ניתן לקחת מ-Streamlit Secrets או להזין ידנית)
-api_key = st.secrets.get("GEMINI_API_KEY") or os.environ.get("GEMINI_API_KEY")
+# אזור הגדרת מפתח API
+api_key = st.text_input("הכנס Google Gemini API Key:", type="password")
 
 if not api_key:
-    st.warning("⚠️ לא נמצא מפתח API מוגדר במערכת.")
-    api_key = st.text_input("הכנס מפתח Google Gemini API Key:", type="password")
+    st.warning("⚠️ מוצר במערכת API לא נמצא מפתח.")
+    st.info("כדי להתחיל להשתמש במערכת API אנא הזן מפתח.")
+    st.stop()
 
-if api_key:
-    client = genai.Client(api_key=api_key)
+# אתחול הלקוח של גוגל
+client = genai.Client(api_key=api_key)
+
+# העלאת קובץ
+uploaded_file = st.file_uploader("העלה תמונה או קובץ של התרגיל", type=["jpg", "jpeg", "png", "webp"])
+
+if uploaded_file is not jamais if uploaded_file is not None:
+    # הצגת התמונה
+    image = PIL.Image.open(uploaded_file)
+    st.image(image, caption="התרגיל שהועלה", use_container_width=True)
     
-    # העלאת קובץ/תמונה של התרגיל
-    uploaded_file = st.file_uploader("העלה צילום מסך או תמונה של התרגיל (מתמטיקה/פיזיקה):", type=["png", "jpg", "jpeg"])
-    
-    if uploaded_file is not None:
-        # הצגת התמונה
-       st.image(uploaded_file, caption="התרגיל שהועלה", use_container_width=True)
-        
-        if st.button("🚀 פתח תרגיל בצורה חכמה", type="primary"):
-            with st.spinner("מנתח את השאלה, מזהה סעיפים ומייצר פתרון אקדמי..."):
-                try:
-                    # המרת התמונה לפורמט שה-SDK החדש דורש
-                    image_bytes = uploaded_file.getvalue()
-                    image_part = types.Part.from_bytes(
-                        data=image_bytes,
-                        mime_type=uploaded_file.type
-                    )
-                    
-                    # הנחיית מערכת (Prompt) חכמה המטפלת גם בשאלות ללא סעיפים וגם במספר בלתי מוגבל של סעיפים
-                    prompt = """
-                    אתה מורה אקדמי מומחה למתמטיקה ופיזיקה. נתחה את התמונה המצורפת בעיון רב.
-                    
-                    עליך לבצע את הפעולות הבאות:
-                    1. זיהוי מבנה השאלה:
-                       - אם השאלה היא שאלה כללית/פתוחה **ללא סעיפים**, פתור אותה כיחידה אחת שלמה, ברורה ומנומקת.
-                       - אם השאלה כוללת **סעיפים**, זהה באופן דינמי ואוטומטי את **כל** הסעיפים הקיימים בתרגיל (ללא שום מגבלה או הנחה שמדובר במספר קבוע של סעיפים).
-                    
-                    2. מתן פתרון אקדמי מלא:
-                       - הצג שלבי פתרון מפורטים, הגיוניים ומתמטיים/פיזיקליים לכל חלק או סעיף שזוהה.
-                       - השתמש בסימון מתמטי ברור (LaTeX) היכן שנדרש.
-                    """
-                    
-                    # קריאה למודל המתקדם של גוגל (Gemini 2.5 Flash או מודל עדכני תואם)
-                    response = client.models.generate_content(
-                        model='gemini-2.5-flash',
-                        contents=[image_part, prompt]
-                    )
-                    
-                    st.success("הפתרון נוצר בהצלחה!")
-                    st.markdown("### 📝 תוצאות והסברים:")
-                    st.markdown(response.text)
-                    
-                except Exception as e:
-                    st.error(f"אירעה שגיאה בעיבוד הבקשה: {e}")
-else:
-    st.info("אנא הזן מפתח API כדי להתחיל להשתמש במערכת.")
+    if st.button("פתור תרגיל", type="primary"):
+        with st.spinner("מנתח את התרגיל ומייצר פתרון מפורט..."):
+            try:
+                # פרומפט מובנה לניתוח דינמי ופתרון אקדמי
+                prompt = """
+                נתח את התמונה המצורפת של התרגיל האקדמי (מתמטיקה/פיזיקה/הנדסה) ובצע את הפעולות הבאות:
+                1. זיהוי מבנה השאלה: 
+                   - האם יש סעיפים (א, ב, ג...)? 
+                   - האם זו שאלה אחידה ללא סעיפים?
+                2. מתן פתרון אקדמי מלא:
+                   - הצג שלבי פתרון מפורטים, הגיוניים ומתמטיים/פיזיקליים לכל חלק או סעיף שזוהה.
+                   - השתמש בסימון מתמטי ברור (LaTeX) היכן שנדרש.
+                   - הקפד על דיוק חישובי והסבר מילולי קצר לכל מעבר שלב משמעותי.
+                """
+                
+                # קריאה למודל המתקדם של גוגל (Gemini 2.5 Flash או מודל עדכני תואם)
+                response = client.models.generate_content(
+                    model='gemini-2.5-flash',
+                    contents=[image, prompt]
+                )
+                
+                st.success("הפתרון נוצר בהצלחה!")
+                st.markdown("---")
+                st.markdown(response.text)
+                
+            except Exception as e:
+                st.error(f"אירעה שגיאה בעת עיבוד הבקשה מול המערכת: {e}")
