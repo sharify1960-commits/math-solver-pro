@@ -29,7 +29,7 @@ client = genai.Client(api_key=api_key)
 # העלאת קובץ
 uploaded_file = st.file_uploader("העלה תמונה או קובץ של התרגיל", type=["jpg", "jpeg", "png", "webp"])
 
-if uploaded_file is not jamais if uploaded_file is not None:
+if uploaded_file is not None:
     # הצגת התמונה
     image = PIL.Image.open(uploaded_file)
     st.image(image, caption="התרגיל שהועלה", use_container_width=True)
