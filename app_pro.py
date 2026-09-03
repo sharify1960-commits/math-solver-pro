@@ -15,8 +15,11 @@ st.set_page_config(
 st.title("📐 מערכת מתקדמת לפתרון תרגילים אקדמיים")
 st.markdown("מערכת המבוססת על בינה מלאכותית לניתוח מדויק של שאלות, זיהוי דינמי של סעיפים (או שאלות ללא סעיפים) והצגת פתרונות מנומקים.")
 
-# אזור הגדרת מפתח API
-api_key = st.text_input("הכנס Google Gemini API Key:", type="password")
+# שליפה אוטומטית של מפתח ה-API מתוך ההגדרות המאובטחות של Streamlit (או תיבת טקסט כגיבוי)
+try:
+    api_key = st.secrets["GEMINI_API_KEY"]
+except:
+    api_key = st.text_input("הכנס Google Gemini API Key:", type="password")
 
 if not api_key:
     st.warning("⚠️ לא נמצא מפתח API במערכת.")
@@ -49,7 +52,7 @@ if uploaded_file is not None:
                    - הקפד על דיוק חישובי והסבר מילולי קצר לכל מעבר שלב משמעותי.
                 """
                 
-                # קריאה למודל המתקדם של גוגל
+                # קריאה למודל היציב והתקין של גוגל
                 response = client.models.generate_content(
                     model='gemini-1.5-flash',
                     contents=[image, prompt]
